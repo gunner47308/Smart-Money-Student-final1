@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Smart Money Student - AI Student Expense Tracker">
+  <meta name="theme-color" content="#2196F3">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="SMS Money">
+  <title>Smart Money Student | AI Student Expense Tracker</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/icons/favicon.ico">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand">
+        <img src="assets/icons/icon-192.png" alt="Smart Money Student icon">
+        <div>
+          <h1>Smart Money Student</h1>
+          <p>AI Student Expense Tracker</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="themeToggle" type="button" aria-label="สลับโหมดสี" title="Light / Dark Mode">☾</button>
+        <button class="primary-btn" id="installBtn" type="button" hidden>ติดตั้งแอป</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero-grid">
+        <div class="glass-panel entry-panel">
+          <div class="section-title">
+            <span>AI Input</span>
+            <h2>บันทึกรายรับรายจ่ายด้วยภาษาธรรมชาติ</h2>
+          </div>
+          <form id="quickForm" class="quick-form">
+            <label for="naturalInput">พิมพ์รายการ เช่น “กินข้าวกับเพื่อน 80”</label>
+            <div class="input-row">
+              <input id="naturalInput" type="text" autocomplete="off" placeholder="แม่ให้เงิน 1000">
+              <button class="primary-btn" type="submit">บันทึก</button>
+            </div>
+            <p class="hint" id="aiPreview">ระบบจะวิเคราะห์จำนวนเงิน ประเภท และหมวดหมู่ให้อัตโนมัติ</p>
+          </form>
+
+          <div class="budget-box">
+            <div>
+              <span>งบรายเดือน</span>
+              <strong id="budgetDisplay">0 บาท</strong>
+            </div>
+            <form id="budgetForm">
+              <input id="budgetInput" type="number" min="0" step="1" placeholder="ตั้งงบ">
+              <button class="ghost-btn" type="submit">บันทึกงบ</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="glass-panel insight-panel">
+          <div class="section-title">
+            <span>Smart Insights</span>
+            <h2>ภาพรวมการเงินของนักเรียน</h2>
+          </div>
+          <div class="insight-list">
+            <div>
+              <span>ค่าใช้จ่ายเฉลี่ยต่อวัน</span>
+              <strong id="averageDaily">0 บาท</strong>
+            </div>
+            <div>
+              <span>หมวดที่ใช้เงินมากที่สุด</span>
+              <strong id="topCategory">ยังไม่มีข้อมูล</strong>
+            </div>
+            <div>
+              <span>รายการล่าสุด</span>
+              <strong id="latestItem">ยังไม่มีรายการ</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="summary-grid" aria-label="สรุปการเงิน">
+        <article class="summary-card income">
+          <span>รายรับรวม</span>
+          <strong id="totalIncome">0 บาท</strong>
+        </article>
+        <article class="summary-card expense">
+          <span>รายจ่ายรวม</span>
+          <strong id="totalExpense">0 บาท</strong>
+        </article>
+        <article class="summary-card balance">
+          <span>ยอดคงเหลือ</span>
+          <strong id="balance">0 บาท</strong>
+        </article>
+        <article class="summary-card count">
+          <span>จำนวนรายการทั้งหมด</span>
+          <strong id="totalCount">0</strong>
+        </article>
+      </section>
+
+      <section class="toolbar glass-panel">
+        <div class="search-wrap">
+          <input id="searchInput" type="search" placeholder="ค้นหารายละเอียด ประเภท หรือหมวดหมู่">
+        </div>
+        <select id="typeFilter" aria-label="กรองประเภท">
+          <option value="all">ทุกประเภท</option>
+          <option value="income">รายรับ</option>
+          <option value="expense">รายจ่าย</option>
+        </select>
+        <select id="periodFilter" aria-label="รายงานตามช่วงเวลา">
+          <option value="day">รายวัน</option>
+          <option value="week">รายสัปดาห์</option>
+          <option value="month" selected>รายเดือน</option>
+          <option value="year">รายปี</option>
+          <option value="all">ทั้งหมด</option>
+        </select>
+        <select id="sortSelect" aria-label="เรียงลำดับ">
+          <option value="newest">ใหม่สุด</option>
+          <option value="oldest">เก่าสุด</option>
+          <option value="amountDesc">จำนวนเงินมากสุด</option>
+          <option value="amountAsc">จำนวนเงินน้อยสุด</option>
+        </select>
+      </section>
+
+      <section class="charts-grid">
+        <div class="glass-panel chart-card">
+          <h2>รายจ่ายแต่ละหมวด</h2>
+          <canvas id="categoryChart"></canvas>
+        </div>
+        <div class="glass-panel chart-card">
+          <h2>รายรับ-รายจ่ายรายเดือน</h2>
+          <canvas id="monthlyChart"></canvas>
+        </div>
+        <div class="glass-panel chart-card wide">
+          <h2>แนวโน้มค่าใช้จ่ายรายวัน</h2>
+          <canvas id="dailyChart"></canvas>
+        </div>
+      </section>
+
+      <section class="glass-panel table-panel">
+        <div class="table-head">
+          <div>
+            <span>Transactions</span>
+            <h2>ตารางรายการ</h2>
+          </div>
+          <div class="file-actions">
+            <button class="ghost-btn" id="exportCsvBtn" type="button">Export CSV</button>
+            <button class="ghost-btn" id="exportExcelBtn" type="button">Export Excel</button>
+            <button class="ghost-btn" id="exportPdfBtn" type="button">Export PDF</button>
+            <label class="ghost-btn import-label" for="csvImport">Import CSV</label>
+            <input id="csvImport" type="file" accept=".csv,text/csv" hidden>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>วันที่</th>
+                <th>รายละเอียด</th>
+                <th>ประเภท</th>
+                <th>หมวดหมู่</th>
+                <th>จำนวนเงิน</th>
+                <th>จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="transactionBody"></tbody>
+          </table>
+          <div class="empty-state" id="emptyState">
+            <img src="assets/icons/icon-192.png" alt="">
+            <strong>ยังไม่มีรายการ</strong>
+            <span>เริ่มจากการพิมพ์ เช่น ข้าว 50 หรือ แม่ให้เงิน 1000</span>
+          </div>
+        </div>
+        <div class="pagination">
+          <button class="ghost-btn" id="prevPage" type="button">ก่อนหน้า</button>
+          <span id="pageInfo">หน้า 1</span>
+          <button class="ghost-btn" id="nextPage" type="button">ถัดไป</button>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>© 2026 Smart Money Student</p>
+      <p>Developed for Educational Project</p>
+    </footer>
+  </div>
+
+  <div class="modal-backdrop" id="editModal" aria-hidden="true">
+    <form class="modal" id="editForm">
+      <div class="modal-head">
+        <h2>แก้ไขรายการ</h2>
+        <button class="icon-btn" id="closeModal" type="button" aria-label="ปิด">×</button>
+      </div>
+      <input id="editId" type="hidden">
+      <label>วันที่ <input id="editDate" type="date" required></label>
+      <label>รายละเอียด <input id="editDescription" type="text" required></label>
+      <label>จำนวนเงิน <input id="editAmount" type="number" min="1" step="1" required></label>
+      <label>ประเภท
+        <select id="editType" required>
+          <option value="income">รายรับ</option>
+          <option value="expense">รายจ่าย</option>
+        </select>
+      </label>
+      <label>หมวดหมู่ <select id="editCategory" required></select></label>
+      <button class="primary-btn" type="submit">บันทึกการแก้ไข</button>
+    </form>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="loading" id="loading"><span></span></div>
+</body>
+</html>
